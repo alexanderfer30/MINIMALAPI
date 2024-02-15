@@ -1,0 +1,87 @@
+﻿@page "/delete-customer/{Id:int}";
+@using CRM.DTOs.CustomerDTOs;
+@using System.Text.Json;
+@using Microsoft.AspNetCore.Components;
+@using Microsoft.AspNetCore.Components.Forms;
+@using CRM.AppWebBlazor.Data;
+
+
+
+
+
+<h3>Eleminar cliente</h3>
+
+
+@if (isSuccess == false && isError == false)
+{
+
+    <div class="row">
+        <div class="col-4">
+            <div class="form-group">
+                <label for="Name">Nombre:</label>
+                <input class="form-control" id="Name" disabled @bind="customer.Name" />
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="form-group">
+                <label for="LastName">Apellido:</label>
+                <input class="form-control" id="LastName" disabled @bind="customer.LastName" />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="form-group">
+                <label for="Address">Dirección:</label>
+                <input class="form-control" id="Address" disabled @bind="customer.Address" />
+            </div>
+        </div>
+    </div>
+    <br />
+
+    <div class="row">
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary" @onclick="async () => await Delete()">Eliminar</button>
+            <NavLink href="/customer-list" class="btn btn-secondary">Cancelar</NavLink>
+        </div>
+    </div>
+}
+else if (isSuccess)
+{
+    <p class="alert alert-success">Cliente elimanado con éxito</p>
+    <NavLink href="/customer-list" class="btn btn-primary">Aceptar</NavLink>
+}
+else if (isError)
+{
+    <p class="alert alert-danger">Ha ocurrido un error inesperado</p>
+    <NavLink href="/customer-list" class="btn btn-primary">Aceptar</NavLink>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    [Inject]
+    CustomerService? customerService { get; set; }
+
+    GetIdResultCustomerDTO customer = new();
+    bool isSuccess = false;
+    bool isError = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (customerService == null) return;
+        customer = await customerService.GetById(Id);
+    }
+
+    private async Task Delete()
+    {
+        if (customerService == null) return;
+        int result = await customerService.Delete(customer.Id);
+
+        if (result > 0)
+            isSuccess = true;
+        else
+            isError = true;
+    }
+}
